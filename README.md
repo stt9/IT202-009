@@ -1,5 +1,10 @@
-1 # IT202
-2 ## Archer
-3
-4 My first repository
-5
+# IT202
+## Archer
+
+My first repository
+
+git add
+
+git status
+
+git push/pull origin master
