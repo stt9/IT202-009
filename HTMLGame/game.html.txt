@@ -1,0 +1,13 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Arcade Shooter Game</title>
+  <meta name="description" content="Description Goes Here">
+  <link rel="stylesheet" href="game.css">
+  <canvas id="canvas" width="600" height="400" tabindex="1"></canvas>
+</head>
+<body>
+  <script src="game.js"></script>
+</body>
+</html>
