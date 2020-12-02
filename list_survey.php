@@ -55,7 +55,7 @@ else{
                 <?php endforeach; ?>
             </div>
         <?php else: ?>
-            <p>No results</p>
+            <p>Sorry, No results</p>
         <?php endif; ?>
     </div>
 </div>

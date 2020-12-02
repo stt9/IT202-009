@@ -61,7 +61,7 @@ if (isset($_POST["search"]) && !empty($query)) {
                     <?php endforeach; ?>
                 </div>
             <?php else: ?>
-                <p>No results</p>
+                <p>Sorry, No results</p>
             <?php endif; ?>
         </div>
     </div>

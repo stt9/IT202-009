@@ -19,6 +19,7 @@ if (isset($_POST["save"])) {
         ":user" => $user
     ]);
     if ($r) {
+        //flash("Created successfully with id: " . $db->lastInsertID());
         $qid = $db->lastInsertId();
         die(header("Location: create_answer.php?id=$qid&survey_id=$id"));
     }
