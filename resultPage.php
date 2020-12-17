@@ -9,7 +9,7 @@ $i = 1;
 if(isset($id)) {
     $id = $_GET["id"];
     $db = getDB();
-    $stmt = $db->prepare("SELECT q.id as GroupId, q.id as QuestionId, q.question, s.id as SurveyId, s.title as SurveyName, s.description as SurveyDesc, a.id as Ans>
+    $stmt = $db->prepare("SELECT q.id as GroupId, q.id as QuestionId, q.question, s.id as SurveyId, s.title as SurveyName, s.description as SurveyDesc, a.id as AnswerId, a.answer FROM Survey as s JOIN Questions as q on s.id = q.survey_id JOIN Answers as a on a.question_id = q.id WHERE s.id = :survey_id");
     $r = $stmt->execute([":survey_id" => $id]);
     $name = "";
     $desc = "";
@@ -36,10 +36,10 @@ if(isset($id)) {
                     array_push($questions[$qid]["answers"], $answer);
                 }
             }
-              }
+        }
     }
 
-    $stmt = $db->prepare("SELECT question_id as GroupId, question_id as QuestionId, survey_id as SurveyId, answer_id as AnswerId FROM Responses where survey_id = :>
+    $stmt = $db->prepare("SELECT question_id as GroupId, question_id as QuestionId, survey_id as SurveyId, answer_id as AnswerId FROM Responses where survey_id = :sid");
     $r = $stmt->execute([":sid" => $id]);
     $responses = [];
     if ($r){
@@ -65,50 +65,54 @@ if(isset($id)) {
 
 
 
-$percentage = [];
+$math = [];
 
 foreach ($questions as $index => $question){
     $qid = $question["questionId"];
     foreach ($question["answers"] as $answer){
         $aid = $answer["answerId"];
-        $counter = 0;
+        $answercounter = 0;
         foreach ($responses as $ind => $questionid){
-            $counter2 = 0;
+            $counter = 0;
             foreach ($questionid as $answerid){
-                if (!isset($percentage[$qid][$aid])){
-                    $percentage[$qid][$aid] = [];
+                if (!isset($math[$qid][$aid])){
+                    $math[$qid][$aid] = [];
                 }
-                if (!isset($percentage[$qid]["answer counter"])){
-                    $percentage[$qid]["answer counter"] = [];
+                if (!isset($math[$qid]["answer counter"])){
+                    $math[$qid]["answer counter"] = [];
                 }
                 if ($answerid == $aid){
-                    array_push($percentage[$qid][$aid], $counter2++);
-                    array_push($percentage[$qid]["answer counter"], $counter++);
+                    array_push($math[$qid][$aid], $counter++);
+                    array_push($math[$qid]["answer counter"], $answercounter++);
                 }
             }
         }
     }
 }
 ?>
-    <h2>Survey Results for: <?php echo $name ?></h2>
-    <h4>Survey Description: <?php echo $desc ?></h4>
-    <div class="results">
-<?php if (count($questions) > 0): ?>
-    <div class="list-group">
-    <?php foreach ($questions as $index => $question): ?>
-        <?php $qid = $question["questionId"]; ?>
-        <div class="list-group-item">
-        <div class="h2"><?php echo "Question " . $i++; ?></div>
-        <div class="h5 justify-content-center text-center"><?php safer_echo($question["question"]); ?></div>
-        <div>
-        <?php foreach ($question["answers"] as $answer): ?>
-            <?php $aid = $answer["answerId"]; ?>
-            <p class="text-center"><?php safer_echo($answer["answer"]); ?><b><?php echo " ". (round(((count($math[$qid][$aid])/count($math[>
+<h2>Survey Results for: <?php echo $name ?></h2>
+<h4>Survey Description: <?php echo $desc ?></h4>
+<div class="results">
+    <?php if (count($questions) > 0): ?>
+        <div class="list-group">
+            <?php foreach ($questions as $index => $question): ?>
+                <?php $qid = $question["questionId"]; ?>
+                <div class="list-group-item">
+                    <div class="h2"><?php echo "Question " . $i++; ?></div>
+                    <div class="h5 justify-content-center text-center"><?php safer_echo($question["question"]); ?></div>
+                    <div>
+                        <?php foreach ($question["answers"] as $answer): ?>
+                            <?php $aid = $answer["answerId"]; ?>
+                            <p class="text-center"><?php safer_echo($answer["answer"]); ?>
+                            <div class="progress">
+                                <div class="progress-bar" role="progressbar" style="width: <?php echo (round(((count($math[$qid][$aid])/count($math[$qid]["answer counter"]))*100))) . "%"; ?>;" aria-valuenow="<?php echo (round(((count($math[$qid][$aid])/count($math[$qid]["answer counter"]))*100))) ?>" aria-valuemin="0" aria-valuemax="100"><b><?php echo " ". (round(((count($math[$qid][$aid])/count($math[$qid]["answer counter"]))*100))) . "%"; ?></b></div>
+                            </div>
+                            </p>
                         <?php endforeach; ?>
+                    </div>
+                </div>
+            <?php endforeach; ?>
         </div>
-        </div>
-    <?php endforeach; ?>
-    </div>
-<?php endif; ?>
-    </div>
+    <?php endif; ?>
+</div>
 <?php require(__DIR__ . "/partials/flash.php"); ?>
