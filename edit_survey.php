@@ -44,15 +44,25 @@ $result = [];
 $qa_result = [];
 $i = 1;
 if(isset($id)) {
-    $id = $_GET["id"];
-    $user = get_user_id();
-    $db = getDB();
-    $stmt = $db->prepare("SELECT * FROM Survey where id = :id AND user_id = :user_id");
-    $r = $stmt->execute([
-        ":id" => $id,
-        ":user_id" => $user
-    ]);
-    $result = $stmt->fetch(PDO::FETCH_ASSOC);
+    if (has_role("Admin")){
+        $id = $_GET["id"];
+        $user = get_user_id();
+        $db = getDB();
+        $stmt = $db->prepare("SELECT * FROM Survey where id = :id");
+        $r = $stmt->execute([":id" => $id]);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+    else{
+        $id = $_GET["id"];
+        $user = get_user_id();
+        $db = getDB();
+        $stmt = $db->prepare("SELECT * FROM Survey where id = :id AND user_id = :user_id");
+        $r = $stmt->execute([
+            ":id" => $id,
+            ":user_id" => $user
+        ]);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+    }
 
     $stmt = $db->prepare("SELECT q.id as GroupId, q.id as QuestionId, q.question, s.id as SurveyId, s.title as SurveyName, a.id as AnswerId, a.answer FROM Survey as s JOIN Questions as q on s.id = q.survey_id JOIN Answers as a on a.question_id = q.id WHERE s.id = :survey_id");
     $r = $stmt->execute([":survey_id" => $id]);
@@ -85,7 +95,7 @@ if(isset($id)) {
 
     <div class="container-fluid">
         <form method="POST">
-            <?php if ($result["user_id"] == get_user_id()): ?>
+            <?php if ($result["user_id"] == get_user_id() || has_role("Admin")): ?>
                 <div class="form-group">
                     <label>Title</label>
                     <input class="form-control" name="title" placeholder="Title" value="<?php echo $result["title"];?>"/>
@@ -101,6 +111,9 @@ if(isset($id)) {
                             <option value="0" <?php echo ($result["visibility"] == "0"?'selected=selected"selected"':'');?>>Draft</option>
                             <option value="1" <?php echo ($result["visibility"] == "1"?'selected=selected"selected"':'');?>>Private</option>
                             <option value="2" <?php echo ($result["visibility"] == "2"?'selected=selected"selected"':'');?>>Public</option>
+                            <?php if (has_role("Admin")): ?>
+                                <option value="3" <?php echo ($result["visibility"] == "3"?'selected=selected"selected"':'');?>>Disabled</option>
+                            <?php endif; ?>
                         </select>
                     <?php else: ?>
                         <p>Draft</p>
@@ -138,7 +151,7 @@ if(isset($id)) {
                     <?php endforeach; ?>
                 </div>
             <?php else: ?>
-                <p>Please add questions</p>
+                <p>Add Questions Please</p>
             <?php endif; ?>
         </div>
         <br>
